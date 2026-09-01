@@ -15,9 +15,16 @@ export function BackgroundVideo() {
 
     let hls: Hls | undefined;
 
+    video.muted = true;
+    video.setAttribute("playsinline", "");
+
     // Safari / browsers with native HLS support
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = VIDEO_URL;
+
+      video.play().catch((error) => {
+        console.error("Native HLS playback failed:", error);
+      });
     }
     // Chrome / Firefox / other browsers
     else if (Hls.isSupported()) {
@@ -25,13 +32,22 @@ export function BackgroundVideo() {
 
       hls.loadSource(VIDEO_URL);
       hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch((error) => {
+          console.error("HLS playback failed:", error);
+        });
+      });
+
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        console.error("HLS error:", data);
+      });
+    } else {
+      console.error("HLS is not supported by this browser.");
     }
 
     return () => {
-      if (hls) {
-        hls.destroy();
-      }
-
+      hls?.destroy();
       video.removeAttribute("src");
       video.load();
     };
