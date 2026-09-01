@@ -10,13 +10,23 @@ export default function Dashboard() {
     <main className="relative bg-black min-h-screen w-full flex flex-col overflow-x-hidden selection:bg-white selection:text-black">
       {/* Hero Section Container */}
       <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden">
-        <BackgroundVideo />
-        <NavbarGlass />
-        <HeroHero />
+        
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0">
+          <BackgroundVideo />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10">
+          <NavbarGlass />
+          <HeroHero />
+        </div>
       </div>
 
       {/* Cinematic CTA + Footer Section */}
-      <CtaFooter />
+      <div className="relative z-10">
+        <CtaFooter />
+      </div>
     </main>
   );
 }
