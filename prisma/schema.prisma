@@ -1,0 +1,45 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Analysis {
+  id                      String     @id @default(uuid())
+  project                 String
+  projectType             String     @default("Software")
+  context                 String?
+  totalTasks              Int
+  highValueCount          Int
+  lowValueCount           Int
+  optionalCount           Int
+  estimatedTimeSavedMinutes Int      @default(0)
+  brutalMode              Boolean    @default(false)
+  verdictSummary          String
+  nextMoves               String     // JSON array of strings
+  createdAt               DateTime   @default(now())
+
+  tasks                   TaskItem[]
+}
+
+model TaskItem {
+  id                    String   @id @default(uuid())
+  analysisId            String
+  analysis              Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  title                 String
+  priority              String   // 'critical' | 'high' | 'medium' | 'low' | 'optional'
+  impact                Int      // 1-10
+  urgency               Int      // 1-10
+  effort                Int      // 1-10
+  category              String   // 'do' | 'defer' | 'eliminate' | 'later'
+  reason                String
+  brutalReason          String
+  recommendation        String
+  dependencyUnblocked   String?  // JSON array of unblocked task titles
+  isIgnored             Boolean  @default(false)
+  isCompleted           Boolean  @default(false)
+  createdAt             DateTime @default(now())
+}
