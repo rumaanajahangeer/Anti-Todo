@@ -16,19 +16,13 @@ export function BackgroundVideo() {
     let hls: Hls | undefined;
 
     video.muted = true;
-    video.setAttribute("playsinline", "");
+    video.playsInline = true;
 
-    // Safari / browsers with native HLS support
-    if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = VIDEO_URL;
-
-      video.play().catch((error) => {
-        console.error("Native HLS playback failed:", error);
+    // Prefer hls.js for Chrome, Edge, Firefox, etc.
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        enableWorker: true,
       });
-    }
-    // Chrome / Firefox / other browsers
-    else if (Hls.isSupported()) {
-      hls = new Hls();
 
       hls.loadSource(VIDEO_URL);
       hls.attachMedia(video);
@@ -42,6 +36,14 @@ export function BackgroundVideo() {
       hls.on(Hls.Events.ERROR, (_event, data) => {
         console.error("HLS error:", data);
       });
+    }
+    // Use native HLS for Safari / compatible browsers
+    else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = VIDEO_URL;
+
+      video.play().catch((error) => {
+        console.error("Native HLS playback failed:", error);
+      });
     } else {
       console.error("HLS is not supported by this browser.");
     }
@@ -54,13 +56,14 @@ export function BackgroundVideo() {
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
       <video
         ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
+        preload="auto"
         className="w-full h-full object-cover opacity-100"
       />
     </div>
